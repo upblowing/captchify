@@ -56,6 +56,9 @@ class Features(BaseModel):
     focus_changes: int = 0
     window_blurs: int = 0
     touch_events: int = 0
+    move_interval_entropy: float = 0.0
+    straightness_score: float = 0.0
+    acceleration_variance: float = 0.0
 
 class VerifyRequest(BaseModel):
     challenge_id: str
@@ -186,6 +189,12 @@ async def captcha_verify(req: Request, body: VerifyRequest):
         score += 0.1; reasons.append("low key timing entropy")
     if f.touch_events == 0 and f.scroll_events == 0 and f.key_events == 0 and f.move_count < 40:
         score += 0.1; reasons.append("very few interactions")
+    if f.move_interval_entropy < 1.2:
+        score += 0.2; reasons.append("suspiciously uniform timing")
+    if f.straightness_score > 0.95:
+        score += 0.2; reasons.append("suspiciously straight movements")
+    if f.acceleration_variance < 0.01:
+        score += 0.15; reasons.append("unnaturally uniform acceleration")
 
     if f.focus_changes >= 1:
         score -= 0.05
