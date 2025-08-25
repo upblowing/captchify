@@ -24,7 +24,7 @@ POW_DIFFICULTY = 18
 CHALLENGE_TTL = 180
 TOKEN_TTL = 300
 
-app = FastAPI(title="puke.sh capthca demo")
+app = FastAPI(title="captchify")
 
 app.add_middleware(
     CORSMiddleware,
