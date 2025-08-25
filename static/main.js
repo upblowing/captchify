@@ -21,6 +21,8 @@ const S = {
   lastT: null,
   speeds: [],
   angles: [],
+  moveIntervals: [],
+  accelerations: [],
   jitterCount: 0,
   idleEvents: 0,
   scrollEvents: 0,
@@ -72,6 +74,13 @@ function onMoveLike(t, x, y) {
     S.pathLen += dist;
     S.speeds.push(speed);
     S.angles.push(Math.atan2(dy, dx));
+    S.moveIntervals.push(dt);
+    
+    if (S.speeds.length >= 2) {
+      const acceleration = (speed - S.speeds[S.speeds.length - 2]) / dt;
+      S.accelerations.push(acceleration);
+    }
+    
     if (dist < 2) S.jitterCount++;
     if (t - S.lastMoveAt > 160) S.idleEvents++;
   }
@@ -122,6 +131,37 @@ function buildFeatures() {
     for (const c of bins) if (c) { const p = c / total; keyH += -p * Math.log2(p); }
   }
 
+  let moveH = 0;
+  if (S.moveIntervals.length > 2) {
+    const bins = new Array(8).fill(0);
+    const min = Math.min(...S.moveIntervals), max = Math.max(...S.moveIntervals);
+    const span = Math.max(1, max - min);
+    for (const interval of S.moveIntervals) {
+      bins[Math.min(7, Math.floor(8 * (interval - min) / span))]++;
+    }
+    const total = S.moveIntervals.length;
+    for (const c of bins) if (c) { const p = c / total; moveH += -p * Math.log2(p); }
+  }
+
+  let straightness = 0;
+  if (S.points.length >= 3) {
+    let straightSegments = 0;
+    for (let i = 2; i < S.points.length; i++) {
+      const p1 = S.points[i-2], p2 = S.points[i-1], p3 = S.points[i];
+      const d1 = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+      const d2 = Math.hypot(p3.x - p2.x, p3.y - p2.y);
+      const d3 = Math.hypot(p3.x - p1.x, p3.y - p1.y);
+      if (Math.abs(d1 + d2 - d3) < 0.1) straightSegments++;
+    }
+    straightness = straightSegments / (S.points.length - 2);
+  }
+
+  let accVar = 0;
+  if (S.accelerations.length > 0) {
+    const avgAcc = S.accelerations.reduce((a, b) => a + b, 0) / S.accelerations.length;
+    accVar = S.accelerations.reduce((a, b) => a + Math.pow(b - avgAcc, 2), 0) / S.accelerations.length;
+  }
+
   const f = {
     move_count: S.moveCount,
     path_length: Math.round(S.pathLen),
@@ -136,6 +176,9 @@ function buildFeatures() {
     focus_changes: S.focusChanges,
     window_blurs: S.blurs,
     touch_events: S.touchEvents,
+    move_interval_entropy: moveH,
+    straightness_score: straightness,
+    acceleration_variance: accVar,
   };
 
   $metrics.innerHTML = '';
@@ -145,6 +188,9 @@ function buildFeatures() {
     'avg v': f.avg_speed.toFixed(3),
     'max v': f.max_speed.toFixed(3),
     'dir H': f.dir_entropy.toFixed(2),
+    'move H': f.move_interval_entropy.toFixed(2),
+    straight: f.straightness_score.toFixed(3),
+    'acc var': f.acceleration_variance.toFixed(3),
     jitter: f.jitter_ratio.toFixed(3),
     idle: f.idle_events,
     scroll: f.scroll_events,
