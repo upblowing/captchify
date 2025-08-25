@@ -2,6 +2,7 @@
 Modern, secure captcha system.
 <img src="https://github.com/upblowing/captchify/blob/main/assets/captchify.png?raw=true"></img>
 
+-# note; if you want to use it for ur own projects id recommend obfuscating the js in case someone tries to make a bypass for the captcha
 
 WARNING:
 THIS IS NOT PLUG AND PLAY, THIS CAN BE EASILY BYPASSED BY MODIFING REQUESTS, THIS IS JUST POW AND TREAT IS AS A BASE.
