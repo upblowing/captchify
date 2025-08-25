@@ -1,6 +1,6 @@
 # captchify
 Modern, secure captcha system.
-<img src="https://raw.githubusercontent.com/upblowing/captchify/refs/heads/main/assets/vwrcwerwecr.png"></img>
+<img src="https://github.com/upblowing/captchify/blob/main/assets/captchify.png?raw=true"></img>
 
 
 WARNING:
