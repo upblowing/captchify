@@ -1,0 +1,164 @@
+  :root{
+    color-scheme: dark;
+    --bg:#0c0f0c;            
+    --panel:#0f130f;          
+    --edge:#273226;         
+    --edge-2:#1a2219;        
+    --text:#e7f5e7;          
+    --muted:#a9c3a9;           
+    --accent:#6bcf5e;     
+    --accent-2:#3e8f3a;        
+    --accent-3:#a7f06b;        
+    --danger:#e84b4b;
+    --shadow:#000000;
+    --scanline: rgba(255,255,255,.03);
+  }
+
+  *{ box-sizing:border-box }
+  html,body{ height:100% }
+  html{ image-rendering: pixelated }
+  body{
+    margin:0; display:grid; place-items:center; color:var(--text);
+    background:
+      repeating-linear-gradient(0deg, transparent 0 2px, var(--scanline) 2px 3px),
+      radial-gradient(900px 520px at 50% 0%, #0c120c 0, var(--bg) 70%);
+    font: 14px/1.35 ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    letter-spacing:.2px;
+  }
+
+  .px{
+    border:2px solid var(--edge);
+    box-shadow:
+      0 0 0 1px var(--edge-2) inset,
+      0 4px 0 0 #0008;
+  }
+  .px-outline:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:0;
+  }
+  .pixel-corner{
+    border-radius:0;
+    clip-path: polygon(
+      0% 6px, 6px 6px, 6px 0%, calc(100% - 6px) 0%, calc(100% - 6px) 6px, 100% 6px,
+      100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%,
+      6px 100%, 6px calc(100% - 6px), 0% calc(100% - 6px)
+    );
+  }
+  .px-press{ transition: transform .06s steps(2,end), box-shadow .06s steps(2,end) }
+  .px-press:active{ transform: translateY(2px); box-shadow:
+      0 0 0 1px var(--edge-2) inset, 0 1px 0 0 #0007; }
+  .center-stack{
+    width:min(820px,96vw);
+    margin-top:40px;
+    display:grid; gap:14px; place-items:center; text-align:center;
+  }
+  .title{ font-size:26px; letter-spacing:.3px; margin:0 }
+  .sub{ opacity:.8; margin:0 0 8px }
+  #goBtn{
+    position:relative;
+    display:inline-grid; place-items:center;
+    min-width:260px; padding:18px 22px; font-weight:900; color:#0b140b;
+    background:linear-gradient(180deg, var(--accent-3), var(--accent));
+    border:2px solid var(--edge);
+    box-shadow: 0 4px 0 #0009, inset 0 -2px 0 var(--accent-2);
+    cursor:pointer;
+    clip-path: polygon(0% 8px, 8px 8px, 8px 0%, calc(100% - 8px) 0%, calc(100% - 8px) 8px, 100% 8px,
+                       100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%,
+                       8px 100%, 8px calc(100% - 8px), 0% calc(100% - 8px));
+    transition: transform .06s steps(2,end), filter .06s steps(2,end);
+    isolation:isolate;
+  }
+  #goBtn:hover{ filter:brightness(1.05) }
+  #goBtn[disabled]{ opacity:.65; cursor:not-allowed }
+  #goBtn::before,#goBtn::after{
+    content:""; position:absolute; inset:-10px; z-index:-1; opacity:.75; filter: blur(10px);
+    background: conic-gradient(from 90deg, rgba(107,207,94,.42), rgba(167,240,107,.35), rgba(62,143,58,.5), rgba(107,207,94,.42));
+    border-radius:0;
+    clip-path: polygon(0% 8px, 8px 8px, 8px 0%, calc(100% - 8px) 0%, calc(100% - 8px) 8px, 100% 8px,
+                       100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%,
+                       8px 100%, 8px calc(100% - 8px), 0% calc(100% - 8px));
+    animation: aura 2.1s infinite steps(24, end);
+  }
+  #goBtn::after{ animation-delay: 1.05s; opacity:.55 }
+  @keyframes aura{
+    0%{ transform: translateY(0) scale(1); opacity:.7 }
+    50%{ transform: translateY(-1px) scale(1.03); opacity:.25 }
+    100%{ transform: translateY(0) scale(1); opacity:.7 }
+  }
+
+  #status{
+    font-size:12px; color:var(--muted);
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 10px; background:#0d120d; border:2px solid var(--edge);
+    box-shadow: 0 3px 0 #0008, inset 0 0 0 1px var(--edge-2);
+    clip-path: polygon(0% 6px, 6px 6px, 6px 0%, calc(100% - 6px) 0%, calc(100% - 6px) 6px, 100% 6px,
+                       100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%,
+                       6px 100%, 6px calc(100% - 6px), 0% calc(100% - 6px));
+  }
+  .dot{
+    width:8px; height:8px; background:var(--accent); box-shadow:0 0 0 0 rgba(107,207,94,.7);
+    animation: dotpulse 1.9s infinite steps(24,end); display:inline-block;
+  }
+  @keyframes dotpulse{
+    0%{ box-shadow:0 0 0 0 rgba(107,207,94,.7) }
+    60%{ box-shadow:0 0 0 10px rgba(107,207,94,0) }
+    100%{ box-shadow:0 0 0 0 rgba(107,207,94,0) }
+  }
+  #lastResult{ min-height:18px }
+
+  #debugToggle{
+    position:fixed; right:14px; bottom:14px; z-index:60;
+    color:#0b140b; font-weight:900; padding:10px 14px; cursor:pointer;
+    background: linear-gradient(180deg, var(--accent-3), var(--accent));
+    border:2px solid var(--edge); box-shadow: 0 3px 0 #0009, inset 0 -2px 0 var(--accent-2);
+    clip-path: polygon(0% 6px, 6px 6px, 6px 0%, calc(100% - 6px) 0%, calc(100% - 6px) 6px, 100% 6px,
+                       100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%,
+                       6px 100%, 6px calc(100% - 6px), 0% calc(100% - 6px));
+  }
+  #debug{
+    position:fixed; right:14px; bottom:66px; width:min(420px,94vw); max-height:64vh; overflow:auto; display:none; z-index:58;
+    background: color-mix(in oklab, var(--panel), black 4%); color:var(--text);
+    border:2px solid var(--edge); box-shadow: 0 5px 0 #0009, inset 0 0 0 1px var(--edge-2);
+    clip-path: polygon(0% 8px, 8px 8px, 8px 0%, calc(100% - 8px) 0%, calc(100% - 8px) 8px, 100% 8px,
+                       100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%,
+                       8px 100%, 8px calc(100% - 8px), 0% calc(100% - 8px));
+    animation: drop .25s steps(6,end) both;
+  }
+  #debug.open{ display:block }
+  #debug header{ display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-bottom:2px dashed var(--edge-2) }
+  #challengeInfo{ font-size:11px; color:var(--muted) }
+  #metrics{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:6px; padding:10px }
+  .chip{
+    background:#0d120d; border:2px solid var(--edge); padding:6px 8px; text-align:center; font-size:12px;
+    box-shadow:0 2px 0 #0008, inset 0 0 0 1px var(--edge-2);
+  }
+  #log{
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    font-size:12px; background:#0b100b; border-top:2px dashed var(--edge-2);
+    padding:10px; white-space:pre-wrap;
+  }
+  .ok{ color:#6bf08d; font-weight:800 }
+  .err{ color:var(--danger); font-weight:800 }
+  #puzzleModal{
+    position:fixed; inset:0; display:none; place-items:center;
+    background: linear-gradient(0deg, #0008, #0008);
+    backdrop-filter: blur(2px);
+  }
+  #puzzleModal.open{ display:grid; animation: fadeUp .18s steps(6,end) both }
+  .modal-card{
+    background: color-mix(in oklab, var(--panel), black 4%);
+    border:2px solid var(--edge);
+    box-shadow: 0 6px 0 #0009, inset 0 0 0 1px var(--edge-2);
+    clip-path: polygon(0% 8px, 8px 8px, 8px 0%, calc(100% - 8px) 0%, calc(100% - 8px) 8px, 100% 8px,
+                       100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%,
+                       8px 100%, 8px calc(100% - 8px), 0% calc(100% - 8px));
+    padding:14px; text-align:center;
+    animation: pop .22s steps(8,end) both;
+  }
+  @keyframes drop{ from{ transform: translateY(-8px); opacity:0 } to{ transform:none; opacity:1 } }
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(4px) } to{ opacity:1; transform:none } }
+  @keyframes pop { from{ transform: scale(.96); } to{ transform: scale(1); } }
+
+  @media (prefers-reduced-motion: reduce){
+    #goBtn::before,#goBtn::after, #debug, #puzzleModal{ animation:none !important }
+  }
