@@ -105,10 +105,30 @@ def root():
     with open(os.path.join(os.path.dirname(__file__), "static", "index.html"), "r", encoding="utf-8") as f:
         return f.read()
 
+def is_bot(req: Request) -> bool:
+    user_agent = req.headers.get("user-agent", "").lower()
+    
+    ids = [
+        "wget", "curl", "python", "requests", "selenium", "chromedriver", "phantomjs",
+        "headless", "puppet", "bot", "crawl", "spider", "scripted", "automated"
+    ]
+    
+    if any(identifier in user_agent for identifier in ids):
+        return True
+        
+    required_headers = ["accept", "accept-language", "accept-encoding"]
+    if not all(header in req.headers for header in required_headers):
+        return True
+        
+    return False
+
 @app.get("/captcha/init", response_model=InitResponse)
 def captcha_init(req: Request):
     ip = ip_addr(req)
     rate_limit(ip)
+    
+    if is_bot(req):
+        raise HTTPException(status_code=403, detail="bots are not allowed")
 
     challenge_id = secrets.token_urlsafe(16)
     srv_nonce = secrets.token_urlsafe(16)
