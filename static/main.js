@@ -228,39 +228,133 @@ async function findNonce(prefixHex, difficultyBits) {
 
 function initPuzzle() {
   const canvas = document.getElementById('puzzleCanvas');
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { alpha: false });
+
+  const css = getComputedStyle(document.documentElement);
+  const getVar = (k, fallback = '#000') => (css.getPropertyValue(k) || fallback).trim();
+
+  const COL = {
+    bg:      getVar('--panel', '#0f130f'),
+    edge:    getVar('--edge', '#273226'),
+    edge2:   getVar('--edge-2', '#1a2219'),
+    text:    getVar('--text', '#e7f5e7'),
+    muted:   getVar('--muted', '#a9c3a9'),
+    accent:  getVar('--accent', '#6bcf5e'),
+    accent2: getVar('--accent-2', '#3e8f3a'),
+    accent3: getVar('--accent-3', '#a7f06b'),
+    danger:  getVar('--danger', '#e84b4b'),
+    shadow:  getVar('--shadow', '#000000'),
+  };
+  const dpr = Math.max(1, window.devicePixelRatio || 1);
+  const cssW = canvas.clientWidth || canvas.width;
+  const cssH = canvas.clientHeight || canvas.height;
+  canvas.width  = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  canvas.style.imageRendering = 'pixelated';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.imageSmoothingEnabled = false;
+  ctx.lineJoin = 'miter';
+  ctx.lineCap = 'butt';
+
+  canvas.classList.add('px', 'pixel-corner');
+  try {
+    if (typeof $puzzleModal !== 'undefined' && $puzzleModal) {
+      $puzzleModal.classList.add('open'); 
+      const card = $puzzleModal.querySelector('.modal-card');
+      if (card) card.classList.add('px', 'pixel-corner');
+      $puzzleModal.classList.remove('open');
+    }
+  } catch (_) { /* ignore */ }
+
   const target = { x: 240, y: 70, r: 18 };
-  const start = { x: 80, y: 70, r: 10 };
+  const start  = { x:  80, y: 70, r: 10 };
   let dragging = false;
   function draw(dotX = start.x, dotY = start.y) {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.beginPath(); ctx.arc(target.x, target.y, target.r + 6, 0, Math.PI * 2);
-    ctx.strokeStyle = '#2c6cf6'; ctx.lineWidth = 4; ctx.stroke();
-    ctx.beginPath(); ctx.arc(dotX, dotY, start.r, 0, Math.PI * 2);
-    ctx.fillStyle = '#48d597'; ctx.fill();
+    ctx.save();
+    ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+    ctx.fillStyle = COL.bg;
+    ctx.fillRect(0, 0, canvas.width / dpr, canvas.height / dpr);
+    ctx.beginPath();
+    ctx.arc(target.x, target.y, target.r + 8, 0, Math.PI * 2);
+    ctx.strokeStyle = COL.edge2;
+    ctx.lineWidth = 6;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(target.x, target.y, target.r + 5, 0, Math.PI * 2);
+    ctx.strokeStyle = COL.edge;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.save();
+    ctx.shadowColor = COL.accent;
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.arc(target.x, target.y, target.r + 2, 0, Math.PI * 2);
+    ctx.strokeStyle = COL.accent3;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+    const g = ctx.createRadialGradient(dotX - 3, dotY - 4, 2, dotX, dotY, start.r + 6);
+    g.addColorStop(0, COL.accent3);
+    g.addColorStop(0.6, COL.accent);
+    g.addColorStop(1, COL.accent2);
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, start.r + 2, 0, Math.PI * 2);
+    ctx.fillStyle = g;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, start.r + 2, 0, Math.PI * 2);
+    ctx.strokeStyle = COL.edge;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, start.r - 1, 0, Math.PI * 2);
+    ctx.fillStyle = COL.accent;
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(dotX - 3, dotY - 3, 2, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.fill();
+
+    ctx.restore();
   }
+
   draw();
+
   function isInside(x, y, cx, cy, r) { return Math.hypot(x - cx, y - cy) <= r; }
+
+  const setCursor = () => { canvas.style.cursor = dragging ? 'grabbing' : 'grab'; };
+  setCursor();
+
   canvas.addEventListener('mousedown', (e) => {
     const r = canvas.getBoundingClientRect();
     const x = e.clientX - r.left, y = e.clientY - r.top;
-    if (isInside(x, y, start.x, start.y, start.r + 6)) dragging = true;
+    if (isInside(x, y, start.x, start.y, start.r + 6)) {
+      dragging = true;
+      setCursor();
+    }
   });
+
   canvas.addEventListener('mousemove', (e) => {
     if (!dragging) return;
     const r = canvas.getBoundingClientRect();
     draw(e.clientX - r.left, e.clientY - r.top);
   });
+
   window.addEventListener('mouseup', (e) => {
     if (!dragging) return;
     dragging = false;
+    setCursor();
     const r = canvas.getBoundingClientRect();
     const x = e.clientX - r.left, y = e.clientY - r.top;
     if (isInside(x, y, target.x, target.y, target.r)) {
       S.puzzleOK = true;
-      $puzzleModal.classList.remove('open');
-      setStatus('puzzle solved. tap verify again.', true, false);
-      log('puzzle: ok');
+      if (typeof $puzzleModal !== 'undefined' && $puzzleModal) {
+        $puzzleModal.classList.remove('open');
+      }
+      if (typeof setStatus === 'function') {
+        setStatus('puzzle solved. tap verify again.', true, false);
+      }
+      if (typeof log === 'function') log('puzzle: ok');
     } else {
       draw();
     }
